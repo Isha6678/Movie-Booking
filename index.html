@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MovieBook - Movie Booking System</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        .navbar {
+            padding: 22px 60px;
+            background: #181818;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            color: #ffcc00;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1d1d1d;
+            padding: 30px;
+            border-radius: 18px;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #aaa;
+        }
+
+        /* TIMER */
+
+        .timer-box {
+            margin-top: 25px;
+            padding: 22px;
+            text-align: center;
+            border: 1px solid #ff4444;
+            border-radius: 12px;
+            background: #3a1111;
+        }
+
+        .timer {
+            color: #ff5555;
+            font-size: 42px;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .timer-status {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        /* MOVIE DETAILS */
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            background: #242424;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 12px;
+        }
+
+        .detail-item {
+            color: #ddd;
+        }
+
+        .detail-item b {
+            color: #ffcc00;
+        }
+
+        /* SCREEN */
+
+        .screen {
+            width: 75%;
+            margin: 35px auto;
+            background: white;
+            color: black;
+            padding: 12px;
+            text-align: center;
+            border-radius: 50% 50% 5px 5px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        /* LEGEND */
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .green {
+            background: #198754;
+        }
+
+        .yellow {
+            background: #ffc107;
+        }
+
+        .red {
+            background: #dc3545;
+        }
+
+        /* SEATS */
+
+        .seats {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .seat {
+            height: 42px;
+            border: none;
+            border-radius: 7px;
+            background: #198754;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .seat:hover {
+            transform: scale(1.05);
+        }
+
+        .seat.selected {
+            background: #ffc107;
+            color: black;
+        }
+
+        .seat.booked {
+            background: #dc3545;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* PAYMENT */
+
+        .payment {
+            margin-top: 30px;
+            padding: 22px;
+            background: #242424;
+            border-radius: 12px;
+        }
+
+        .pay-button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #ffc107;
+            color: black;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .pay-button:hover {
+            background: #e0a800;
+        }
+
+        .pay-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* MESSAGE */
+
+        .message {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .success {
+            background: #123d23;
+            border: 1px solid #198754;
+        }
+
+        .error {
+            background: #451313;
+            border: 1px solid #dc3545;
+        }
+
+        .info {
+            background: #3b3210;
+            border: 1px solid #ffc107;
+        }
+
+        .code {
+            font-size: 30px;
+            color: #ffcc00;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin: 15px 0;
+        }
+
+        .pdf-button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width: 700px) {
+
+            .navbar {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .seats {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .screen {
+                width: 95%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div class="navbar">
+
+    <div class="logo">
+        🎬 MovieBook
+    </div>
+
+</div>
+
+
+
+<div class="container">
+
+<div class="card">
+
+
+<!-- =====================================================
+     MOVIE
+===================================================== -->
+
+<h1>
+    Avengers: End Game
+</h1>
+
+<p class="subtitle">
+    Select your seat and complete the booking.
+</p>
+
+
+
+<!-- =====================================================
+     TIMER
+===================================================== -->
+
+<div class="timer-box">
+
+    <div>
+        Transaction Time Remaining
+    </div>
+
+    <div
+        id="timer"
+        class="timer"
+    >
+        15:00
+    </div>
+
+    <div class="timer-status">
+        Timer starts after selecting a seat.
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MOVIE DETAILS
+===================================================== -->
+
+<div class="details">
+
+    <div class="detail-item">
+
+        <b>Movie</b>
+
+        <br>
+
+        Avengers: End Game
+
+    </div>
+
+
+    <div class="detail-item">
+
+        <b>Date</b>
+
+        <br>
+
+        <span id="movieDate"></span>
+
+    </div>
+
+
+    <div class="detail-item">
+
+        <b>Time</b>
+
+        <br>
+
+        6:30 PM
+
+    </div>
+
+
+    <div class="detail-item">
+
+        <b>Screen</b>
+
+        <br>
+
+        Screen 1
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SCREEN
+===================================================== -->
+
+<div class="screen">
+    SCREEN
+</div>
+
+
+
+<!-- =====================================================
+     LEGEND
+===================================================== -->
+
+<div class="legend">
+
+    <div class="legend-item">
+
+        <div class="legend-box green"></div>
+
+        Available
+
+    </div>
+
+
+    <div class="legend-item">
+
+        <div class="legend-box yellow"></div>
+
+        Selected
+
+    </div>
+
+
+    <div class="legend-item">
+
+        <div class="legend-box red"></div>
+
+        Booked
+
+    </div>
+
+</div>
+
+
+
+<h3>
+    Select Your Seat
+</h3>
+
+
+
+<!-- =====================================================
+     SEATS
+===================================================== -->
+
+<div
+    id="seatContainer"
+    class="seats"
+>
+</div>
+
+
+
+<!-- =====================================================
+     PAYMENT
+===================================================== -->
+
+<div class="payment">
+
+    <p>
+
+        <b>
+            Selected Seat:
+        </b>
+
+        <span id="selectedSeat">
+            None
+        </span>
+
+    </p>
+
+
+    <p>
+
+        <b>
+            Ticket Price:
+        </b>
+
+        ₹250
+
+    </p>
+
+
+    <button
+        id="paymentButton"
+        class="pay-button"
+        onclick="payAtCounter()"
+    >
+
+        🏪 Pay at Counter
+
+    </button>
+
+</div>
+
+
+
+<!-- =====================================================
+     MESSAGE
+===================================================== -->
+
+<div
+    id="messageBox"
+    class="message"
+>
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/*
+=========================================================
+BACKEND API
+=========================================================
+*/
+
+const API_URL =
+    "http://localhost:5555/api/bookings";
+
+
+
+/*
+=========================================================
+MOVIE INFORMATION
+=========================================================
+*/
+
+const movie =
+    "Avengers: End Game";
+
+const time =
+    "6:30 PM";
+
+const screen =
+    "Screen 1";
+
+const amount =
+    250;
+
+
+
+/*
+=========================================================
+DATE
+=========================================================
+*/
+
+const today =
+    new Date();
+
+
+const dateString =
+    today.toLocaleDateString(
+        "en-IN"
+    );
+
+
+document.getElementById(
+    "movieDate"
+).innerText =
+    dateString;
+
+
+
+/*
+=========================================================
+VARIABLES
+=========================================================
+*/
+
+let selectedSeat =
+    null;
+
+
+let bookedSeats =
+    [];
+
+
+let timerSeconds =
+    15 * 60;
+
+
+let timerInterval =
+    null;
+
+
+
+/*
+=========================================================
+CREATE SEATS
+=========================================================
+
+IMPORTANT:
+
+Booked seat is NOT disabled.
+
+When user clicks red seat,
+Case 2 message will appear.
+=========================================================
+*/
+
+function createSeats() {
+
+    const container =
+        document.getElementById(
+            "seatContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    for (
+        let i = 1;
+        i <= 50;
+        i++
+    ) {
+
+        const seat =
+            document.createElement(
+                "button"
+            );
+
+
+        seat.className =
+            "seat";
+
+
+        seat.innerText =
+            i;
+
+
+        seat.id =
+            "seat-" + i;
+
+
+
+        /*
+        Check booked seat
+        */
+
+        if (
+            bookedSeats.includes(i)
+        ) {
+
+            seat.classList.add(
+                "booked"
+            );
+
+        }
+
+
+
+        /*
+        Seat click
+        */
+
+        seat.onclick =
+            function() {
+
+
+                /*
+                CASE 2:
+
+                If red/booked seat clicked
+                */
+
+                if (
+                    bookedSeats.includes(i)
+                ) {
+
+                    showMessage(
+
+                        "The seat is already booked. Please select any other seat.",
+
+                        "error"
+
+                    );
+
+
+                    return;
+
+                }
+
+
+                /*
+                Normal available seat
+                */
+
+                selectSeat(i);
+
+            };
+
+
+        container.appendChild(
+            seat
+        );
+
+    }
+
+}
+
+
+
+/*
+=========================================================
+LOAD BOOKED SEATS FROM MONGODB
+=========================================================
+*/
+
+async function loadBookedSeats() {
+
+    try {
+
+        const response =
+            await fetch(
+
+                `${API_URL}/booked-seats` +
+
+                `?movie=${encodeURIComponent(movie)}` +
+
+                `&date=${encodeURIComponent(dateString)}` +
+
+                `&time=${encodeURIComponent(time)}` +
+
+                `&screen=${encodeURIComponent(screen)}`
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.success
+        ) {
+
+            bookedSeats =
+                data.bookedSeats || [];
+
+        }
+
+
+        createSeats();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Error loading seats:",
+            error
+        );
+
+
+        createSeats();
+
+    }
+
+}
+
+
+
+/*
+=========================================================
+SELECT SEAT
+=========================================================
+*/
+
+function selectSeat(
+    seatNumber
+) {
+
+
+    /*
+    Safety check
+    */
+
+    if (
+        bookedSeats.includes(
+            seatNumber
+        )
+    ) {
+
+        showMessage(
+
+            "The seat is already booked. Please select any other seat.",
+
+            "error"
+
+        );
+
+        return;
+
+    }
+
+
+
+    /*
+    Remove previous selection
+    */
+
+    if (
+        selectedSeat !== null
+    ) {
+
+        const previousSeat =
+            document.getElementById(
+                "seat-" + selectedSeat
+            );
+
+
+        if (
+            previousSeat
+        ) {
+
+            previousSeat.classList.remove(
+                "selected"
+            );
+
+        }
+
+    }
+
+
+
+    /*
+    Set selected seat
+    */
+
+    selectedSeat =
+        seatNumber;
+
+
+    const currentSeat =
+        document.getElementById(
+            "seat-" + seatNumber
+        );
+
+
+    currentSeat.classList.add(
+        "selected"
+    );
+
+
+    document.getElementById(
+        "selectedSeat"
+    ).innerText =
+        "Seat " + seatNumber;
+
+
+
+    /*
+    =====================================================
+    TIMER STARTS HERE
+    =====================================================
+
+    Page open par timer START nahi hota.
+
+    Seat select karne ke baad start hota hai.
+    */
+
+    if (
+        timerInterval === null
+    ) {
+
+        startTimer();
+
+    }
+
+
+    hideMessage();
+
+}
+
+
+
+/*
+=========================================================
+START TIMER
+=========================================================
+*/
+
+function startTimer() {
+
+
+    /*
+    Prevent multiple timers
+    */
+
+    if (
+        timerInterval !== null
+    ) {
+
+        return;
+
+    }
+
+
+    timerInterval =
+        setInterval(
+            function() {
+
+
+                timerSeconds--;
+
+
+                updateTimer();
+
+
+                /*
+                00:00
+                */
+
+                if (
+                    timerSeconds <= 0
+                ) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    timerInterval =
+                        null;
+
+
+                    transactionTimeout();
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+
+/*
+=========================================================
+UPDATE TIMER
+=========================================================
+*/
+
+function updateTimer() {
+
+
+    const minutes =
+        Math.floor(
+            timerSeconds / 60
+        );
+
+
+    const seconds =
+        timerSeconds % 60;
+
+
+    document.getElementById(
+        "timer"
+    ).innerText =
+
+        String(
+            minutes
+        ).padStart(
+            2,
+            "0"
+        )
+
+        +
+
+        ":"
+
+        +
+
+        String(
+            seconds
+        ).padStart(
+            2,
+            "0"
+        );
+
+}
+
+
+
+/*
+=========================================================
+TRANSACTION TIMEOUT
+=========================================================
+*/
+
+function transactionTimeout() {
+
+
+    /*
+    Selected seat becomes available
+    because booking was NOT completed.
+    */
+
+    selectedSeat =
+        null;
+
+
+    document.getElementById(
+        "selectedSeat"
+    ).innerText =
+        "None";
+
+
+    /*
+    Reset timer
+    */
+
+    timerSeconds =
+        15 * 60;
+
+
+    updateTimer();
+
+
+    /*
+    Refresh seats
+    */
+
+    createSeats();
+
+
+    /*
+    Enable payment button
+    */
+
+    const button =
+        document.getElementById(
+            "paymentButton"
+        );
+
+
+    button.disabled =
+        false;
+
+
+    button.innerText =
+        "🏪 Pay at Counter";
+
+
+    showMessage(
+
+        "Transaction cancelled because the 15-minute time expired. Please select a seat again.",
+
+        "error"
+
+    );
+
+}
+
+
+
+/*
+=========================================================
+PAY AT COUNTER
+=========================================================
+*/
+
+async function payAtCounter() {
+
+
+    /*
+    No seat
+    */
+
+    if (
+        selectedSeat === null
+    ) {
+
+        showMessage(
+
+            "Please select a seat first.",
+
+            "info"
+
+        );
+
+        return;
+
+    }
+
+
+
+    const button =
+        document.getElementById(
+            "paymentButton"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.innerText =
+        "Processing...";
+
+
+
+    try {
+
+
+        /*
+        Send booking request
+        */
+
+        const response =
+            await fetch(
+
+                `${API_URL}/book`,
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            movie:
+
+                                movie,
+
+                            date:
+
+                                dateString,
+
+                            time:
+
+                                time,
+
+                            screen:
+
+                                screen,
+
+                            seatNumber:
+
+                                selectedSeat,
+
+                            amount:
+
+                                amount,
+
+                            paymentMode:
+
+                                "COUNTER"
+
+                        })
+
+                }
+
+            );
+
+
+
+        const data =
+            await response.json();
+
+
+
+        /*
+        =================================================
+        CASE 2
+        =================================================
+
+        Seat was already booked.
+        */
+
+        if (
+            response.status === 409
+            &&
+            data.case === 2
+        ) {
+
+
+            showMessage(
+
+                "The seat is already booked. Please select any other seat.",
+
+                "error"
+
+            );
+
+
+            /*
+            Reload seats from MongoDB
+            */
+
+            await loadBookedSeats();
+
+
+            resetSelection();
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =================================================
+        CASE 3
+        =================================================
+
+        Another user booked same seat
+        at almost the same time.
+        */
+
+        if (
+            response.status === 409
+            &&
+            data.case === 3
+        ) {
+
+
+            showMessage(
+
+                "This seat was booked by another user. Please select any other seat.",
+
+                "error"
+
+            );
+
+
+            await loadBookedSeats();
+
+
+            resetSelection();
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =================================================
+        SERVER ERROR
+        =================================================
+        */
+
+        if (
+            !response.ok
+        ) {
+
+
+            showMessage(
+
+                data.message ||
+                "Transaction failed.",
+
+                "error"
+
+            );
+
+
+            button.disabled =
+                false;
+
+
+            button.innerText =
+                "🏪 Pay at Counter";
+
+
+            return;
+
+        }
+
+
+
+        /*
+        =================================================
+        CASE 1
+        =================================================
+
+        Successful booking.
+        */
+
+        if (
+            data.success
+        ) {
+
+
+            /*
+            Stop timer
+            */
+
+            if (
+                timerInterval !== null
+            ) {
+
+                clearInterval(
+                    timerInterval
+                );
+
+
+                timerInterval =
+                    null;
+
+            }
+
+
+
+            /*
+            Add seat to booked list
+            */
+
+            if (
+                !bookedSeats.includes(
+                    data.booking.seatNumber
+                )
+            ) {
+
+                bookedSeats.push(
+                    data.booking.seatNumber
+                );
+
+            }
+
+
+            /*
+            Refresh seats
+            */
+
+            createSeats();
+
+
+            /*
+            Remove selection
+            */
+
+            selectedSeat =
+                null;
+
+
+            document.getElementById(
+                "selectedSeat"
+            ).innerText =
+                "None";
+
+
+            /*
+            Show successful transaction
+            */
+
+            showSuccess(
+                data.booking
+            );
+
+
+            button.innerText =
+                "✓ Booking Complete";
+
+        }
+
+    }
+
+    catch(error) {
+
+
+        console.error(
+            "Booking error:",
+            error
+        );
+
+
+        showMessage(
+
+            "Unable to connect to backend. Please make sure the backend is running on port 5555.",
+
+            "error"
+
+        );
+
+
+        button.disabled =
+            false;
+
+
+        button.innerText =
+            "🏪 Pay at Counter";
+
+    }
+
+}
+
+
+
+/*
+=========================================================
+RESET SELECTION
+=========================================================
+*/
+
+function resetSelection() {
+
+
+    selectedSeat =
+        null;
+
+
+    document.getElementById(
+        "selectedSeat"
+    ).innerText =
+        "None";
+
+
+    /*
+    Stop timer
+    */
+
+    if (
+        timerInterval !== null
+    ) {
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        timerInterval =
+            null;
+
+    }
+
+
+    /*
+    Reset timer
+    */
+
+    timerSeconds =
+        15 * 60;
+
+
+    updateTimer();
+
+
+    /*
+    Enable button
+    */
+
+    const button =
+        document.getElementById(
+            "paymentButton"
+        );
+
+
+    button.disabled =
+        false;
+
+
+    button.innerText =
+        "🏪 Pay at Counter";
+
+}
+
+
+
+/*
+=========================================================
+SUCCESS MESSAGE
+=========================================================
+*/
+
+function showSuccess(
+    booking
+) {
+
+
+    const box =
+        document.getElementById(
+            "messageBox"
+        );
+
+
+    box.style.display =
+        "block";
+
+
+    box.className =
+        "message success";
+
+
+    box.innerHTML = `
+
+        <h3>
+            🎉 Transaction Complete
+        </h3>
+
+        <p>
+            The seat has been permanently booked.
+        </p>
+
+        <p>
+            <b>Movie:</b>
+            ${booking.movie}
+        </p>
+
+        <p>
+            <b>Date:</b>
+            ${booking.date}
+        </p>
+
+        <p>
+            <b>Time:</b>
+            ${booking.time}
+        </p>
+
+        <p>
+            <b>Screen:</b>
+            ${booking.screen}
+        </p>
+
+        <p>
+            <b>Seat:</b>
+            ${booking.seatNumber}
+        </p>
+
+        <p>
+            <b>Amount:</b>
+            ₹${booking.amount}
+        </p>
+
+        <p>
+            <b>Payment Mode:</b>
+            Pay at Counter
+        </p>
+
+        <p>
+            <b>Booking Code:</b>
+        </p>
+
+        <div class="code">
+            ${booking.bookingCode}
+        </div>
+
+        <p>
+            Show this code/receipt at the counter
+            to pay and get the ticket.
+        </p>
+
+        <button
+            class="pdf-button"
+            onclick='generatePDF(${JSON.stringify(booking)})'
+        >
+            📄 Generate PDF Receipt
+        </button>
+
+    `;
+
+}
+
+
+
+/*
+=========================================================
+SHOW MESSAGE
+=========================================================
+*/
+
+function showMessage(
+    message,
+    type
+) {
+
+
+    const box =
+        document.getElementById(
+            "messageBox"
+        );
+
+
+    box.style.display =
+        "block";
+
+
+    box.className =
+        "message " + type;
+
+
+    box.innerHTML = `
+
+        <strong>
+            ${message}
+        </strong>
+
+    `;
+
+}
+
+
+
+/*
+=========================================================
+HIDE MESSAGE
+=========================================================
+*/
+
+function hideMessage() {
+
+
+    document.getElementById(
+        "messageBox"
+    ).style.display =
+        "none";
+
+}
+
+
+
+/*
+=========================================================
+GENERATE PDF
+=========================================================
+*/
+
+function generatePDF(
+    booking
+) {
+
+
+    const {
+        jsPDF
+    } =
+        window.jspdf;
+
+
+    const pdf =
+        new jsPDF();
+
+
+    pdf.setFontSize(
+        22
+    );
+
+
+    pdf.text(
+        "MOVIE BOOKING RECEIPT",
+        105,
+        25,
+        {
+            align: "center"
+        }
+    );
+
+
+    pdf.setFontSize(
+        12
+    );
+
+
+    pdf.text(
+        "--------------------------------",
+        20,
+        40
+    );
+
+
+    pdf.text(
+        "Movie: " + booking.movie,
+        20,
+        55
+    );
+
+
+    pdf.text(
+        "Date: " + booking.date,
+        20,
+        65
+    );
+
+
+    pdf.text(
+        "Time: " + booking.time,
+        20,
+        75
+    );
+
+
+    pdf.text(
+        "Screen: " + booking.screen,
+        20,
+        85
+    );
+
+
+    pdf.text(
+        "Seat Number: " +
+        booking.seatNumber,
+        20,
+        95
+    );
+
+
+    pdf.text(
+        "Amount: Rs. " +
+        booking.amount,
+        20,
+        105
+    );
+
+
+    pdf.text(
+        "Payment Mode: Pay at Counter",
+        20,
+        115
+    );
+
+
+    pdf.text(
+        "Booking Code:",
+        20,
+        135
+    );
+
+
+    pdf.setFontSize(
+        20
+    );
+
+
+    pdf.text(
+        booking.bookingCode,
+        20,
+        148
+    );
+
+
+    pdf.setFontSize(
+        12
+    );
+
+
+    pdf.text(
+        "Show this receipt at the counter to pay",
+        20,
+        170
+    );
+
+
+    pdf.text(
+        "and get the ticket.",
+        20,
+        180
+    );
+
+
+    pdf.text(
+        "Thank you for booking!",
+        105,
+        205,
+        {
+            align: "center"
+        }
+    );
+
+
+    pdf.save(
+
+        "Movie_Receipt_" +
+
+        booking.bookingCode +
+
+        ".pdf"
+
+    );
+
+}
+
+
+
+/*
+=========================================================
+INITIAL LOAD
+=========================================================
+
+IMPORTANT:
+
+Timer is ONLY displayed as 15:00.
+Timer does NOT start here.
+=========================================================
+*/
+
+createSeats();
+
+loadBookedSeats();
+
+updateTimer();
+
+
+</script>
+
+
+</body>
+
+</html>
